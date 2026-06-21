@@ -223,6 +223,11 @@
                         const upiFields = document.getElementById('upiFields');
                         const upiName = document.getElementById('upiName');
                         
+                        const qrCodeImg = document.getElementById('qrCodeImg');
+                        const isAuroStudio = "{{ vendor[1]|lower }}" === "auro studio";
+                        const customQrUrl = "{{ url_for('static', filename='img/adhi_gpay_qr.jpg') }}";
+                        const mockQrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=mock@upi&pn=BudgetCrafter&am={{ (vendor[3] * 0.2)|int }}&cu=INR";
+                        
                         if (method === 'card') {
                             cardFields.style.display = 'block';
                             upiFields.style.display = 'none';
@@ -230,6 +235,19 @@
                             cardFields.style.display = 'none';
                             upiFields.style.display = 'block';
                             upiName.innerText = method === 'gpay' ? 'G-Pay' : (method === 'phonepe' ? 'PhonePe' : 'Paytm');
+                            
+                            if (qrCodeImg) {
+                                if (method === 'gpay' && isAuroStudio) {
+                                    qrCodeImg.src = customQrUrl;
+                                    qrCodeImg.style.width = '150px';
+                                    qrCodeImg.style.height = '150px';
+                                    qrCodeImg.style.objectFit = 'cover';
+                                } else {
+                                    qrCodeImg.src = mockQrUrl;
+                                    qrCodeImg.style.width = 'auto';
+                                    qrCodeImg.style.height = 'auto';
+                                }
+                            }
                         }
                     }
                     // Initialize
@@ -254,7 +272,7 @@
         
         <!-- Mock QR Code -->
         <div style="background: white; padding: 10px; display: inline-block; border-radius: 12px; margin-bottom: 1.5rem;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=mock@upi&pn=BudgetCrafter&am={{ (vendor[3] * 0.2)|int }}&cu=INR" alt="QR Code" style="display: block; border-radius: 8px;">
+            <img id="qrCodeImg" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=mock@upi&pn=BudgetCrafter&am={{ (vendor[3] * 0.2)|int }}&cu=INR" alt="QR Code" style="display: block; border-radius: 8px;">
         </div>
         
         <div style="margin-bottom: 1.5rem;">
