@@ -239,9 +239,9 @@
                             if (qrCodeImg) {
                                 if (method === 'gpay' && isAuraStudio) {
                                     qrCodeImg.src = customQrUrl;
-                                    qrCodeImg.style.width = '150px';
-                                    qrCodeImg.style.height = '150px';
-                                    qrCodeImg.style.objectFit = 'cover';
+                                    qrCodeImg.style.width = '200px';
+                                    qrCodeImg.style.height = 'auto';
+                                    qrCodeImg.style.objectFit = 'contain';
                                     qrCodeImg.style.display = 'block';
                                 } else {
                                     qrCodeImg.src = mockQrUrl;
