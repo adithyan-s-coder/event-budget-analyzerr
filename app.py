@@ -14,6 +14,11 @@ def get_db():
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
         db_url = "postgresql://postgres:root%402412200@db.jnpkbyspcekjphfzlncx.supabase.co:5432/postgres"
+    
+    # If the user accidentally pasted the URL with brackets from Supabase, fix it!
+    if "[root@2412200]" in db_url:
+        db_url = db_url.replace("[root@2412200]", "root%402412200")
+        
     conn = psycopg2.connect(db_url)
     return conn
 
@@ -258,7 +263,7 @@ def vendor_login():
     phone = request.form["phone"]
     password = request.form["password"]
 
-    db = sqlite3.connect("event_app.db")
+    db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM vendors WHERE phone=%s AND password=%s", (phone, password))
     vendor = cursor.fetchone()
@@ -410,7 +415,7 @@ def vendor_register():
     
     # Store plain text password directly? No, wait! Vendors don't have password hashing right now? Let's check: Yes, the original code inserted plain text. I should add hashing to be safe, but wait, login uses plain text for vendors. I'll stick to original behavior for vendors to not break login, but wait, the prompt says "password only contains the 8 digit numbers or words with the special characters".
     
-    db = sqlite3.connect("event_app.db")
+    db = get_db()
     cursor = db.cursor()
     try:
         # Default price and rating for new vendors
@@ -429,7 +434,7 @@ def vendor_dashboard():
     if "vendor_id" not in session or session.get("role") != "vendor":
         return redirect(url_for("login"))
         
-    db = sqlite3.connect("event_app.db")
+    db = get_db()
     cursor = db.cursor()
     
     # Get Vendor details
