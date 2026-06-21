@@ -21,7 +21,7 @@ def init_db(db_url=None):
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
+                phone TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL
             )
         """)
@@ -73,7 +73,11 @@ def init_db(db_url=None):
                 description TEXT,
                 image_url TEXT,
                 email TEXT,
-                phone TEXT
+                phone TEXT,
+                password TEXT,
+                business_proof_text TEXT,
+                business_proof_file TEXT,
+                is_verified INTEGER DEFAULT 0
             )
         """)
 
