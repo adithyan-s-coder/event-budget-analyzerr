@@ -9,7 +9,7 @@
     </a>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem;">
+<div class="layout-sidebar-right">
     <!-- Left: Info and Reviews -->
     <div>
         <div class="glass-card" style="padding: 0; overflow: hidden; margin-bottom: 2rem;">
@@ -127,7 +127,7 @@
 
                 <div style="margin-bottom: 1.5rem;">
                     <label style="display: block; font-size: 0.85rem; margin-bottom: 10px;">Select Payment Method</label>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1rem;">
+                    <div class="grid-2" style="margin-bottom: 1rem; gap: 10px;">
                         <!-- GPay -->
                         <div onclick="selectPayment('gpay')" id="pay-gpay" class="payment-option">
                             <i class="fab fa-google-pay"></i>
@@ -158,7 +158,7 @@
                         <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">CARD NUMBER</label>
                         <input type="text" class="form-control" placeholder="0000 0000 0000 0000" style="letter-spacing: 2px;">
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="grid-2" style="gap: 10px;">
                         <div>
                             <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">EXPIRY</label>
                             <input type="text" class="form-control" placeholder="MM/YY">

@@ -22,7 +22,7 @@
 
 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
     {% for b in bookings %}
-    <div class="glass-card" style="display: grid; grid-template-columns: 120px 1fr 200px auto; gap: 2rem; align-items: center;">
+    <div class="glass-card flex-wrap-mobile" style="align-items: center; justify-content: space-between;">
         <img src="{{ b[10] }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;">
         
         <div>

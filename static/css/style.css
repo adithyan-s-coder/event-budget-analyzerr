@@ -309,9 +309,110 @@ tr:hover td {
 .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
 .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--accent-yellow); }
 
+/* Responsive Layout Utilities */
+.grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.layout-sidebar-right {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 1.5rem;
+}
+
+.layout-sidebar-left {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1.5rem;
+}
+
+.flex-wrap-mobile {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 1024px) {
+    .layout-sidebar-right, .layout-sidebar-left {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
-    .sidebar { width: 80px; padding: 2rem 1rem; }
-    .logo span { display: none; }
-    .nav-item span { display: none; }
-    .main-content { margin-left: 80px; padding: 1.5rem; }
+    .sidebar { 
+        width: 100%; 
+        height: 70px; 
+        padding: 0 0.5rem; 
+        position: fixed;
+        bottom: 0;
+        top: auto;
+        flex-direction: row;
+        border-right: none;
+        border-top: 1px solid var(--glass-border);
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+        z-index: 1000;
+    }
+    .logo { display: none; }
+    .nav-links { 
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+        align-items: center;
+        gap: 0;
+    }
+    .nav-item { 
+        padding: 0.5rem;
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+    }
+    .nav-item i { font-size: 1.2rem; }
+    .nav-item span { display: block; font-size: 0.65rem; font-weight: 500; }
+    
+    .logout-btn { margin-top: 0 !important; }
+    
+    .main-content { 
+        margin-left: 0; 
+        padding: 1.5rem 1rem 90px 1rem; 
+    }
+    
+    .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .flex-wrap-mobile {
+        flex-wrap: wrap;
+    }
+    
+    .flex-wrap-mobile > * {
+        flex: 1 1 100%;
+        max-width: 100% !important;
+    }
+    
+    /* Ensure modals scale down */
+    #paymentModal .glass-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    /* Make tables scrollable instead of overflowing */
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .glass-card { padding: 1.25rem; }
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
 }

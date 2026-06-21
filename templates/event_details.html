@@ -100,7 +100,7 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; margin-bottom: 2rem;">
+<div class="layout-sidebar-right" style="margin-bottom: 2rem;">
     <!-- Left Column -->
     <div>
         <div class="tabs">
@@ -156,7 +156,7 @@
         <div id="guests" class="tab-content">
             <div class="glass-card">
                 <h3>Guest List 👥</h3>
-                <form action="/add_guest/{{ event[0] }}" method="POST" style="display: flex; gap: 10px; margin: 1.5rem 0;">
+                <form action="/add_guest/{{ event[0] }}" method="POST" class="flex-wrap-mobile" style="margin: 1.5rem 0;">
                     <input name="name" class="form-control" placeholder="Guest Name" required>
                     <input name="notes" class="form-control" placeholder="Notes (e.g. Dietary)">
                     <button type="submit" class="btn btn-primary">Add</button>
@@ -199,7 +199,7 @@
         <div id="timeline" class="tab-content">
             <div class="glass-card">
                 <h3>Event Schedule 🕒</h3>
-                <form action="/add_timeline/{{ event[0] }}" method="POST" style="display: grid; grid-template-columns: 120px 1fr 1fr auto; gap: 10px; margin: 1.5rem 0;">
+                <form action="/add_timeline/{{ event[0] }}" method="POST" class="flex-wrap-mobile" style="align-items: center; margin: 1.5rem 0;">
                     <input name="time" class="form-control" placeholder="Time (12:00)" required>
                     <input name="activity" class="form-control" placeholder="Activity" required>
                     <input name="notes" class="form-control" placeholder="Notes">

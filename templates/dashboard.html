@@ -8,7 +8,7 @@
     <p style="color: var(--text-muted);">Manage your active events and overall budget health.</p>
 </div>
 
-<div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+<div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
     <div class="glass-card metric-card">
         <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Cumulative Budget</div>
         <div style="font-size: 1.8rem; font-weight: 700; color: #818cf8;">₹{{ total_budget or 0 }}</div>
@@ -31,7 +31,7 @@
         </a>
     </div>
     
-    <div style="display: flex; gap: 10px; margin-bottom: 1.5rem;">
+    <div class="flex-wrap-mobile" style="margin-bottom: 1.5rem;">
         <input type="text" id="searchInput" class="form-control" placeholder="Search events..." onkeyup="filterEvents()" style="max-width: 300px;">
         <select id="typeFilter" class="form-control" onchange="filterEvents()" style="max-width: 200px;">
             <option value="all">All Types</option>
@@ -42,7 +42,7 @@
         </select>
     </div>
 
-    <div class="events-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    <div class="events-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
         {% for event in events %}
         <div class="glass-card interactive-card event-card" data-name="{{ event[1]|lower }}" data-type="{{ event[2]|lower }}" style="margin-bottom: 0; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
@@ -67,9 +67,9 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+<div class="grid-2" style="margin-top: 2rem;">
     <!-- Ratio Chart -->
-    <div class="glass-card" style="display: flex; align-items: center; gap: 2rem;">
+    <div class="glass-card flex-wrap-mobile" style="align-items: center; justify-content: space-between;">
         <div style="flex: 1;">
             <h3>Spending Ratio</h3>
             <p style="color: var(--text-muted); font-size: 0.85rem;">Cumulative utilization.</p>

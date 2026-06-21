@@ -98,6 +98,14 @@
         from { transform: translate(-50%, 100%); opacity: 0; }
         to { transform: translate(-50%, 0); opacity: 1; }
     }
+    @media (max-width: 768px) {
+        .selection-bar {
+            bottom: 80px; /* Above bottom nav */
+            width: calc(100% - 20px);
+            padding: 1rem;
+        }
+        .selection-bar > div { flex-wrap: wrap; justify-content: center; text-align: center; }
+    }
 </style>
 {% endblock %}
 
@@ -140,7 +148,7 @@
             {{ v[5] or "Specialized professional services for your perfect event celebrations." }}
         </p>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem;">
+        <div class="grid-2" style="gap: 8px; margin-bottom: 1rem;">
             <button onclick="toggleVendor('{{ v[0] }}', '{{ v[1]|escape }}', '{{ v[3] }}')" class="btn" id="btn-select-{{ v[0] }}" style="justify-content: center; background: rgba(255,255,255,0.05); color: white; font-size: 0.8rem; padding: 0.5rem; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
                 <i class="fas fa-plus"></i> Select
             </button>
@@ -221,7 +229,7 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="grid-2" style="gap: 10px;">
             <a id="modalTelBtn" href="#" class="btn" style="background: #34d399; color: black; justify-content: center; font-weight: 600;">
                 <i class="fas fa-phone"></i> Call Now
             </a>
