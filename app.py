@@ -86,27 +86,23 @@ def register():
         if not re.match(r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$", password):
             return render_template("register.html", error="Password must be at least 8 characters and contain letters, numbers, and a special character.")
 
+        hashed_pw = generate_password_hash(password)
+        db = get_db()
+        cursor = db.cursor()
         try:
-            hashed_pw = generate_password_hash(password)
-            db = get_db()
-            cursor = db.cursor()
-            try:
-                cursor.execute(
-                    "INSERT INTO users (phone, password) VALUES (%s, %s)",
-                    (phone, hashed_pw)
-                )
-                db.commit()
-                session.pop("otp", None) # clear OTP
-                session.pop("otp_phone", None)
-            except psycopg2.IntegrityError:
-                return render_template("register.html", error="This Mobile number is already registered.")
-            finally:
-                cursor.close()
-                db.close()
-            return redirect("/")
-        except Exception as e:
-            import traceback
-            return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+            cursor.execute(
+                "INSERT INTO users (phone, password) VALUES (%s, %s)",
+                (phone, hashed_pw)
+            )
+            db.commit()
+            session.pop("otp", None) # clear OTP
+            session.pop("otp_phone", None)
+        except psycopg2.IntegrityError:
+            return render_template("register.html", error="This Mobile number is already registered.")
+        finally:
+            cursor.close()
+            db.close()
+        return redirect("/")
     return render_template("register.html")
 
 # GLOBAL DASHBOARD
