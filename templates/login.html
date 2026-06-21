@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BudgetCrafter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ffffff;
+            --bg-dark: #000000;
+            --glass-bg: #0a0a0a;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ededed;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .login-card h2 {
+            font-weight: 500;
+            color: #a1a1aa;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #52525b;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--glass-border);
+            padding: 1rem 1rem 1rem 3rem;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .login-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .register-link {
+            display: block;
+            margin-top: 2rem;
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .register-link span {
+            color: white;
+            font-weight: 500;
+        }
+
+        .register-link:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/event-budget-analyser-logo.svg') }}" alt="Logo" style="height: 40px; width: 40px; border-radius: 8px;">
+            BudgetCrafter
+        </div>
+        
+        <!-- Role Toggle -->
+        <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 5px; margin-bottom: 2rem;">
+            <div id="btn-planner" onclick="setRole('planner')" style="flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--primary); color: var(--bg-dark); font-weight: 600; transition: all 0.3s;">
+                <i class="fas fa-user"></i> Event Planner
+            </div>
+            <div id="btn-vendor" onclick="setRole('vendor')" style="flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 600; transition: all 0.3s;">
+                <i class="fas fa-store"></i> Business/Vendor
+            </div>
+        </div>
+
+        <div id="fade-wrapper" style="transition: opacity 0.5s ease-in-out; opacity: 1;">
+            <h2 id="login-title">Sign in as Planner</h2>
+
+        {% if error %}
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; padding: 10px; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; font-size: 0.85rem; font-weight: 500;">
+            <i class="fas fa-exclamation-circle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login" id="loginForm">
+            <div class="input-group">
+                <i class="fas fa-phone"></i>
+                <input type="text" name="phone" placeholder="Mobile Number" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+
+        <a href="/register" id="registerLink" class="register-link">Don't have an account? <span>Create Account</span></a>
+        </div>
+    </div>
+
+    <script>
+        function setRole(role) {
+            const btnPlanner = document.getElementById('btn-planner');
+            const btnVendor = document.getElementById('btn-vendor');
+            const form = document.getElementById('loginForm');
+            const title = document.getElementById('login-title');
+            const registerLink = document.getElementById('registerLink');
+            const fadeWrapper = document.getElementById('fade-wrapper');
+
+            fadeWrapper.style.opacity = '0';
+
+            setTimeout(() => {
+                if (role === 'planner') {
+                    btnPlanner.style.background = 'var(--primary)';
+                    btnPlanner.style.color = 'var(--bg-dark)';
+                    btnVendor.style.background = 'transparent';
+                    btnVendor.style.color = 'var(--text-muted)';
+                    form.action = '/login';
+                    title.innerText = 'Sign in as Planner';
+                    registerLink.href = '/register';
+                } else {
+                    btnVendor.style.background = 'var(--primary)';
+                    btnVendor.style.color = 'var(--bg-dark)';
+                    btnPlanner.style.background = 'transparent';
+                    btnPlanner.style.color = 'var(--text-muted)';
+                    form.action = '/vendor_login';
+                    title.innerText = 'Business Portal Login';
+                    registerLink.href = '/vendor_register';
+                }
+                fadeWrapper.style.opacity = '1';
+            }, 500); // 500ms delay matches the slower CSS transition time
+        }
+    </script>
+</body>
+</html>

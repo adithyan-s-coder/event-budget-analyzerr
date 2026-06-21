@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Event Budget App{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/event-budget-analyser-logo.svg') }}" alt="Logo" style="height: 32px; width: 32px; border-radius: 6px;">
+            <span>BudgetCrafter</span>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-item {% if request.path == '/dashboard' %}active{% endif %}">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/create_event" class="nav-item {% if request.path == '/create_event' %}active{% endif %}">
+                <i class="fas fa-plus-circle"></i>
+                <span>Create Event</span>
+            </a>
+            <a href="/vendors" class="nav-item {% if request.path == '/vendors' %}active{% endif %}">
+                <i class="fas fa-search-dollar"></i>
+                <span>Find Vendors</span>
+            </a>
+            <a href="/bookings" class="nav-item {% if request.path == '/bookings' %}active{% endif %}">
+                <i class="fas fa-history"></i>
+                <span>My Bookings</span>
+            </a>
+            <a href="/add_expense" class="nav-item {% if request.path == '/add_expense' %}active{% endif %}">
+                <i class="fas fa-receipt"></i>
+                <span>Add Expense</span>
+            </a>
+            <a href="/logout" class="nav-item logout-btn" style="margin-top: auto;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <main class="main-content page-transition" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        function showToast(message, isError = false) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "top", 
+                position: "right", 
+                style: {
+                    background: isError ? "linear-gradient(to right, #ef4444, #f87171)" : "linear-gradient(to right, #10b981, #34d399)",
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    fontFamily: "'Poppins', sans-serif"
+                }
+            }).showToast();
+        }
+
+        // Page Transition and Staggered Load Logic
+        document.addEventListener("DOMContentLoaded", () => {
+            const main = document.getElementById("main-content");
+            
+            // Auto-apply staggered animations to cards
+            document.querySelectorAll('.glass-card, .metric-card').forEach((el, index) => {
+                if(!el.classList.contains('no-animate')) {
+                    el.classList.add('animate-on-load');
+                    const delay = (index % 5) + 1;
+                    el.classList.add(`delay-${delay}`);
+                }
+            });
+
+            // Intercept internal links for smooth exit
+            document.querySelectorAll('a').forEach(link => {
+                if(link.href && link.href.startsWith(window.location.origin) && !link.href.includes('#') && !link.href.includes('javascript')) {
+                    link.addEventListener('click', e => {
+                        if (e.ctrlKey || e.metaKey || link.target === '_blank') return;
+                        e.preventDefault();
+                        main.style.animation = "fadeInPage 0.25s ease-in reverse forwards";
+                        setTimeout(() => {
+                            window.location.href = link.href;
+                        }, 200);
+                    });
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

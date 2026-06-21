@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Successful - BudgetCrafter{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 600px; margin: 4rem auto; text-align: center; padding: 4rem;">
+    <div style="width: 100px; height: 100px; background: rgba(52, 211, 153, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem;">
+        <i class="fas fa-check" style="color: #34d399; font-size: 3rem; animation: scaleIn 0.5s ease-out;"></i>
+    </div>
+    
+    <h1 style="margin-bottom: 1rem;">Booking Confirmed! 🎉</h1>
+    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 2rem;">
+        Your advance payment of <strong>₹{{ amount }}</strong> has been successfully processed.
+    </p>
+
+    <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.05);">
+        <p style="margin: 0; font-size: 0.95rem;">
+            The vendor has been notified and will contact you shortly to discuss the event details.
+            You can find the booking details in your history.
+        </p>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="/bookings" class="btn btn-primary" style="padding: 0.8rem 2rem;">View My Bookings</a>
+        <a href="/dashboard" class="btn" style="background: rgba(255,255,255,0.05); color: white; padding: 0.8rem 2rem;">Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+@keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+{% endblock %}

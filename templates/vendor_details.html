@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}{{ vendor[1] }} - Details{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <a href="/vendors" style="color: var(--text-muted); text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> Back to Marketplace
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem;">
+    <!-- Left: Info and Reviews -->
+    <div>
+        <div class="glass-card" style="padding: 0; overflow: hidden; margin-bottom: 2rem;">
+            <img src="{{ vendor[6] }}" style="width: 100%; height: 350px; object-fit: cover;">
+            <div style="padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="badge badge-warning">{{ vendor[2] }}</span>
+                        <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2);" title="Government ID & GST Verified by BudgetCrafter">
+                            <i class="fas fa-check-circle"></i> KYC Verified
+                        </span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; margin-top: 0.5rem;">
+                        <h1 style="margin: 0;">{{ vendor[1] }}</h1>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="color: #fbbf24; font-size: 1.5rem; font-weight: 700;">
+                            <i class="fas fa-star"></i> {{ vendor[4] }}
+                        </div>
+                        <div style="color: var(--text-muted); font-size: 0.85rem;">Average Rating</div>
+                    </div>
+                </div>
+                <p style="font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.8); margin-bottom: 2rem;">
+                    {{ vendor[5] }}
+                </p>
+                
+                <div style="display: flex; gap: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;">
+                    <div>
+                        <span style="display: block; color: var(--text-muted); font-size: 0.8rem;">STARTING PRICE</span>
+                        <strong style="font-size: 1.4rem; color: #34d399;">₹{{ vendor[3] }}</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; color: var(--text-muted); font-size: 0.8rem;">CONTACT EMAIL</span>
+                        <strong>{{ vendor[7] }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="glass-card">
+            <h3>Customer Reviews ({{ reviews|length }})</h3>
+            <div style="margin-top: 1.5rem;">
+                {% for r in reviews %}
+                <div style="padding: 1.5rem; background: rgba(255,255,255,0.02); border-radius: 12px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <strong style="color: var(--primary);">{{ r[6] }}</strong>
+                            <span style="font-size: 0.7rem; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 2px 6px; border-radius: 4px;">
+                                <i class="fas fa-shield-check"></i> Verified Booking
+                            </span>
+                        </div>
+                        <div style="color: #fbbf24;">
+                            {% for i in range(r[3]) %}<i class="fas fa-star"></i>{% endfor %}
+                        </div>
+                    </div>
+                    <p style="font-size: 0.95rem; font-style: italic;">"{{ r[4] }}"</p>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">{{ r[5] }}</span>
+                </div>
+                {% else %}
+                <p style="color: var(--text-muted); text-align: center; padding: 2rem;">No reviews yet. Be the first to review!</p>
+                {% endfor %}
+            </div>
+
+            <!-- Add Review Form -->
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                <h4>Write a Review</h4>
+                <form action="/add_review/{{ vendor[0] }}" method="POST" style="margin-top: 1rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.85rem; margin-bottom: 5px;">Rating</label>
+                        <select name="rating" class="form-control" style="width: 150px;">
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <textarea name="comment" class="form-control" placeholder="Share your experience with this vendor..." rows="4" required></textarea>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Submit Review</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Booking & Payment -->
+    <div>
+        <div class="glass-card" style="position: sticky; top: 2rem; border: 1px solid var(--primary);">
+            <h3 style="margin-bottom: 1.5rem;">Book Service 📅</h3>
+            
+            <form action="/book_vendor" method="POST" id="bookingForm">
+                <input type="hidden" name="vendor_id" value="{{ vendor[0] }}">
+                <input type="hidden" name="amount" value="{{ vendor[3] }}">
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 8px;">Select Event</label>
+                    <select name="event_id" class="form-control" required>
+                        {% for e in events %}
+                        <option value="{{ e[0] }}">{{ e[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="background: rgba(52, 211, 153, 0.05); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Total Price:</span>
+                        <strong>₹{{ vendor[3] }}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; color: #34d399; font-weight: 700;">
+                        <span>Advance to Pay (20%):</span>
+                        <span>₹{{ (vendor[3] * 0.2)|int }}</span>
+                    </div>
+                    <input type="hidden" name="advance" value="{{ (vendor[3] * 0.2)|int }}">
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; font-size: 0.85rem; margin-bottom: 10px;">Select Payment Method</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1rem;">
+                        <!-- GPay -->
+                        <div onclick="selectPayment('gpay')" id="pay-gpay" class="payment-option">
+                            <i class="fab fa-google-pay"></i>
+                            <span>G-Pay</span>
+                        </div>
+                        <!-- PhonePe -->
+                        <div onclick="selectPayment('phonepe')" id="pay-phonepe" class="payment-option">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>PhonePe</span>
+                        </div>
+                        <!-- Paytm -->
+                        <div onclick="selectPayment('paytm')" id="pay-paytm" class="payment-option">
+                            <i class="fas fa-wallet"></i>
+                            <span>Paytm</span>
+                        </div>
+                        <!-- Card -->
+                        <div onclick="selectPayment('card')" id="pay-card" class="payment-option">
+                            <i class="fas fa-credit-card"></i>
+                            <span>ATM Card</span>
+                        </div>
+                    </div>
+                    <input type="hidden" name="payment_method" id="selectedPaymentMethod" value="gpay">
+                </div>
+
+                <!-- Card Details (Hidden by default) -->
+                <div id="cardFields" style="display: none; background: rgba(255,255,255,0.03); padding: 1.2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">CARD NUMBER</label>
+                        <input type="text" class="form-control" placeholder="0000 0000 0000 0000" style="letter-spacing: 2px;">
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">EXPIRY</label>
+                            <input type="text" class="form-control" placeholder="MM/YY">
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">CVV</label>
+                            <input type="password" class="form-control" placeholder="***">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPI Details (Shown for GPay, PhonePe, Paytm) -->
+                <div id="upiFields" style="background: rgba(99, 102, 241, 0.05); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(99, 102, 241, 0.1); text-align: center;">
+                    <p style="font-size: 0.85rem; margin: 0; color: var(--primary);">
+                        <i class="fas fa-info-circle"></i> You will be redirected to the <span id="upiName">G-Pay</span> app.
+                    </p>
+                </div>
+
+                <!-- Platform Guarantee -->
+                <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                    <h4 style="color: #10b981; font-size: 0.9rem; margin-bottom: 5px;"><i class="fas fa-shield-alt"></i> 100% Platform Guarantee</h4>
+                    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin: 0; line-height: 1.4;">If the vendor fails to show up, BudgetCrafter guarantees an instant 100% refund of your advance payment.</p>
+                </div>
+
+                <button type="button" onclick="openPaymentModal()" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem; font-weight: 700;">
+                    Confirm & Pay ₹{{ (vendor[3] * 0.2)|int }}
+                </button>
+
+                <style>
+                    .payment-option {
+                        padding: 12px;
+                        border: 1px solid rgba(255,255,255,0.1);
+                        border-radius: 10px;
+                        text-align: center;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 5px;
+                        background: rgba(255,255,255,0.02);
+                    }
+                    .payment-option i { font-size: 1.4rem; }
+                    .payment-option span { font-size: 0.75rem; font-weight: 600; }
+                    .payment-option:hover { background: rgba(255,255,255,0.05); }
+                    .payment-option.active {
+                        border-color: var(--primary);
+                        background: rgba(99, 102, 241, 0.1);
+                        color: var(--primary);
+                    }
+                </style>
+
+                <script>
+                    function selectPayment(method) {
+                        // Reset all
+                        document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('active'));
+                        // Set active
+                        document.getElementById('pay-' + method).classList.add('active');
+                        document.getElementById('selectedPaymentMethod').value = method;
+                        
+                        const cardFields = document.getElementById('cardFields');
+                        const upiFields = document.getElementById('upiFields');
+                        const upiName = document.getElementById('upiName');
+                        
+                        if (method === 'card') {
+                            cardFields.style.display = 'block';
+                            upiFields.style.display = 'none';
+                        } else {
+                            cardFields.style.display = 'none';
+                            upiFields.style.display = 'block';
+                            upiName.innerText = method === 'gpay' ? 'G-Pay' : (method === 'phonepe' ? 'PhonePe' : 'Paytm');
+                        }
+                    }
+                    // Initialize
+                    window.onload = function() { selectPayment('gpay'); }
+                </script>
+            </form>
+
+            <p style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+                <i class="fas fa-lock"></i> Escrow Protected Payment
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Mock Payment Modal -->
+<div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(5px);">
+    <div class="glass-card" style="width: 100%; max-width: 400px; padding: 2rem; position: relative; text-align: center; animation: slideUpFade 0.3s ease;">
+        <button type="button" onclick="closePaymentModal()" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;"><i class="fas fa-times"></i></button>
+        
+        <h3 style="margin-bottom: 5px;">Scan to Pay</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Pay ₹{{ (vendor[3] * 0.2)|int }} securely via UPI</p>
+        
+        <!-- Mock QR Code -->
+        <div style="background: white; padding: 10px; display: inline-block; border-radius: 12px; margin-bottom: 1.5rem;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=mock@upi&pn=BudgetCrafter&am={{ (vendor[3] * 0.2)|int }}&cu=INR" alt="QR Code" style="display: block; border-radius: 8px;">
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <span style="display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px;">OR ENTER UPI ID</span>
+            <input type="text" id="upiIdInput" class="form-control" placeholder="e.g. name@okaxis" style="text-align: center;">
+        </div>
+        
+        <button type="button" onclick="processPayment()" id="finalPayBtn" class="btn btn-primary" style="width: 100%;">
+            Complete Payment
+        </button>
+    </div>
+</div>
+
+<script>
+    function openPaymentModal() {
+        // Validate form first
+        const form = document.getElementById('bookingForm');
+        if(!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        document.getElementById('paymentModal').style.display = 'flex';
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function processPayment() {
+        const btn = document.getElementById('finalPayBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+        
+        // Simulate network delay
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-check-circle"></i> Payment Successful';
+            btn.style.background = '#10b981';
+            
+            // Submit the actual form to book
+            setTimeout(() => {
+                document.getElementById('bookingForm').submit();
+            }, 1000);
+        }, 2000);
+    }
+</script>
+
+{% endblock %}

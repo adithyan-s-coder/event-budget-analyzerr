@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Dashboard - BudgetCrafter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        .vendor-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+        .status-Pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .status-Accepted { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-Declined { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/event-budget-analyser-logo.svg') }}" alt="Logo" style="height: 32px; width: 32px; border-radius: 6px;">
+            <span>BudgetCrafter</span>
+        </div>
+        <div class="nav-links" style="flex: 1;">
+            <a href="/vendor_dashboard" class="nav-item active">
+                <i class="fas fa-store"></i> 
+                <span>Business Dashboard</span>
+            </a>
+            <a href="/logout" class="nav-item logout-btn" style="margin-top: auto; color: var(--text-muted);">
+                <i class="fas fa-sign-out-alt"></i> 
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <span class="vendor-badge"><i class="fas fa-check-circle"></i> Verified Business Partner</span>
+                <h1 style="margin-top: 0.5rem;">Welcome, {{ vendor[1] }}</h1>
+                <p style="color: var(--text-muted); margin: 0;">Manage your bookings and view your Escrow earnings.</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 5px;">Total Escrow Earnings</div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: #10b981;">
+                    {% set total_escrow = bookings | selectattr('6', 'equalto', 'Accepted') | sum(attribute='5') %}
+                    ₹{{ total_escrow }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="glass-card">
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">Pending Requests</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">
+                    {{ bookings | selectattr('6', 'equalto', 'Pending') | list | length }}
+                </div>
+            </div>
+            <div class="glass-card">
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">Accepted Bookings</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">
+                    {{ bookings | selectattr('6', 'equalto', 'Accepted') | list | length }}
+                </div>
+            </div>
+            <div class="glass-card">
+                <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">Your Current Rating</div>
+                <div style="font-size: 1.5rem; font-weight: 700; color: #fbbf24;">
+                    <i class="fas fa-star"></i> {{ vendor[4] }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="glass-card">
+            <h3 style="margin-bottom: 1.5rem;">Recent Booking Requests</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Client Contact</th>
+                            <th>Event Name</th>
+                            <th>Advance Paid (Escrow)</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in bookings %}
+                        <tr>
+                            <td style="font-weight: 600;"><i class="fas fa-phone-alt" style="color: var(--text-muted); font-size: 0.8rem; margin-right: 5px;"></i> {{ b[9] }}</td>
+                            <td>{{ b[8] }}</td>
+                            <td style="color: #34d399; font-weight: 700;">₹{{ "{:,.0f}".format(b[5]) }}</td>
+                            <td>
+                                <span class="status-badge status-{{ b[6] }}">{{ b[6] }}</span>
+                            </td>
+                            <td>
+                                {% if b[6] == 'Pending' %}
+                                <div style="display: flex; gap: 10px;">
+                                    <a href="/update_booking_status/{{ b[0] }}/Accepted" class="btn" style="background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 5px 10px; font-size: 0.8rem; border: 1px solid rgba(16, 185, 129, 0.2);"><i class="fas fa-check"></i> Accept</a>
+                                    <a href="/update_booking_status/{{ b[0] }}/Declined" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 5px 10px; font-size: 0.8rem; border: 1px solid rgba(239, 68, 68, 0.2);"><i class="fas fa-times"></i> Decline</a>
+                                </div>
+                                {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fas fa-lock"></i> Locked</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">No bookings yet. Make sure your profile is updated!</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

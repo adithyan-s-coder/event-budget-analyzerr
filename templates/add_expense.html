@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Add Expense - BudgetCrafter{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 600px; margin: 0 auto;">
+    <h2 style="display: flex; align-items: center; gap: 12px;">
+        <i class="fas fa-receipt" style="color: var(--primary);"></i>
+        Log New Expense
+    </h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Assign this expense to one of your active events.</p>
+
+    <form method="POST">
+        <div class="form-group">
+            <label>Link to Event</label>
+            <select name="event_id" class="form-control" required>
+                {% for event in user_events %}
+                <option value="{{ event[0] }}">{{ event[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select name="category" class="form-control" required>
+                <option value="Venue">Venue</option>
+                <option value="Catering">Catering</option>
+                <option value="Decor">Decoration</option>
+                <option value="Photography">Photography</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Transport">Transport</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Item Description</label>
+            <input name="item" class="form-control" placeholder="e.g. Stage Lighting" required>
+        </div>
+
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input name="amount" type="number" class="form-control" placeholder="e.g. 5000" required>
+        </div>
+
+        <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+            <button type="submit" class="btn btn-primary">Add Expense</button>
+            <a href="/dashboard" class="btn" style="background: rgba(255,255,255,0.05); color: white;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

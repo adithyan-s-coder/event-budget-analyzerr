@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - BudgetCrafter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        :root {
+            --primary: #ffffff;
+            --bg-dark: #000000;
+            --glass-bg: #0a0a0a;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ededed;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            overflow-y: auto;
+            padding: 2rem 1rem;
+        }
+
+        .login-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .login-card h2 {
+            font-weight: 500;
+            color: #a1a1aa;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #52525b;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            background: #000;
+            border: 1px solid var(--glass-border);
+            padding: 1rem 1rem 1rem 3rem;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+            appearance: none;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.3);
+        }
+
+        .flex-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .send-otp-btn {
+            background: #111;
+            color: white;
+            border: 1px solid var(--glass-border);
+            padding: 0 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .send-otp-btn:hover {
+            background: #1a1a1a;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+
+        .login-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .register-link {
+            display: block;
+            margin-top: 2rem;
+            color: #a1a1aa;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .register-link span {
+            color: white;
+            font-weight: 500;
+        }
+
+        .register-link:hover {
+            color: white;
+        }
+
+        /* Hidden OTP Field Initially */
+        #otp-container {
+            display: none;
+        }
+
+        /* Smooth Transition for Vendor Fields */
+        .vendor-fields-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            transition: grid-template-rows 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+        }
+
+        .vendor-fields-wrapper.show {
+            grid-template-rows: 1fr;
+            opacity: 1;
+        }
+
+        #vendorFields {
+            overflow: hidden;
+            min-height: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='img/event-budget-analyser-logo.svg') }}" alt="Logo" style="height: 40px; width: 40px; border-radius: 8px;">
+            BudgetCrafter
+        </div>
+        
+        <!-- Role Toggle -->
+        <div style="display: flex; background: rgba(255,255,255,0.05); border-radius: 12px; padding: 5px; margin-bottom: 2rem;">
+            <div id="btn-planner" onclick="setRole('planner')" style="flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; background: var(--primary); color: var(--bg-dark); font-weight: 600; transition: all 0.3s;">
+                <i class="fas fa-user"></i> Event Planner
+            </div>
+            <div id="btn-vendor" onclick="setRole('vendor')" style="flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: 600; transition: all 0.3s;">
+                <i class="fas fa-store"></i> Business/Vendor
+            </div>
+        </div>
+
+        <div id="fade-wrapper" style="transition: opacity 0.5s ease-in-out; opacity: 1;">
+            <h2 id="register-title">Create an account via Mobile</h2>
+
+        {% if error %}
+        <div id="error-box" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; padding: 10px; border-radius: 8px; margin-bottom: 1.5rem; text-align: center; font-size: 0.85rem; font-weight: 500; transition: opacity 0.5s ease;">
+            <i class="fas fa-exclamation-circle"></i> {{ error }}
+        </div>
+        <script>
+            setTimeout(() => {
+                const errorBox = document.getElementById('error-box');
+                if (errorBox) {
+                    errorBox.style.opacity = '0';
+                    setTimeout(() => errorBox.style.display = 'none', 500); // Wait for fade out to finish before hiding
+                }
+            }, 3000);
+        </script>
+        {% endif %}
+
+        <form method="POST" action="/register" id="registerForm" enctype="multipart/form-data">
+            <!-- Vendor Extra Fields (Hidden by default via CSS grid) -->
+            <div class="vendor-fields-wrapper" id="vendorWrapper">
+                <div id="vendorFields">
+                <div class="input-group">
+                    <i class="fas fa-briefcase"></i>
+                    <input type="text" name="business_name" id="business_name" placeholder="Business Name *">
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-tags"></i>
+                    <select name="category" required>
+                        <option value="" disabled selected>Select Business Category *</option>
+                        <option value="Photography">Photography</option>
+                        <option value="Decoration">Decoration</option>
+                        <option value="Catering">Catering</option>
+                        <option value="Music">Music/Entertainment</option>
+                        <option value="Venue">Venue</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-id-card"></i>
+                    <select name="business_proof_text" required>
+                        <option value="" disabled selected>Select Document Type *</option>
+                        <option value="GSTIN">GSTIN Certificate</option>
+                        <option value="PAN">PAN Card</option>
+                        <option value="Aadhaar">Aadhaar Card</option>
+                        <option value="Trade License">Trade License</option>
+                    </select>
+                </div>
+                <div class="input-group" style="padding: 10px; flex-direction: column; align-items: flex-start; gap: 8px;">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);">
+                        <i class="fas fa-file-upload"></i> Upload ID / License Photo <span style="color: #ef4444;">*</span> <span style="font-size: 0.7rem; color: #52525b; margin-left: 5px;">(JPG, JPEG, PDF | 2MB - 10MB)</span>
+                    </label>
+                    <input type="file" name="business_proof_file" accept=".jpg,.jpeg,.pdf" style="padding-top: 14px; color: var(--text-muted);" required>
+                </div>
+            </div>
+            </div>
+            <div class="flex-group">
+                <div class="input-group" style="margin-bottom: 0; flex: 1;">
+                    <i class="fas fa-phone"></i>
+                    <input type="text" id="phone" name="phone" placeholder="Mobile Number *" value="{{ form_data.phone if form_data else '' }}" required>
+                </div>
+                <button type="button" class="send-otp-btn" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
+            </div>
+
+            <div class="input-group" id="otp-container">
+                <i class="fas fa-key"></i>
+                <input type="text" id="otp" placeholder="Enter 4-Digit OTP *">
+                <button type="button" class="send-otp-btn" id="verifyOtpBtn" onclick="verifyOTP()" style="margin-left: 10px;">Verify</button>
+            </div>
+
+            <div id="password-container" style="display: none;">
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="Create Password *" required 
+                           pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" 
+                           title="Password must be at least 8 characters and contain letters, numbers, and a special character.">
+                </div>
+                <!-- Hidden inputs to pass the phone and OTP to the backend since we removed them from the main flow if needed. Wait, phone is still in the form. But OTP was removed from name. -->
+                <input type="hidden" name="otp" id="hidden_otp">
+                
+                <button type="submit" class="login-btn">Register Securely</button>
+            </div>
+        </form>
+
+        <a href="/login" id="loginLink" class="register-link">Already have an account? <span>Login</span></a>
+        </div>
+    </div>
+
+    <script>
+        let currentSentOtp = null;
+        let activeOtpToast = null;
+
+        function showToast(message, isError = false, durationMs = 4000) {
+            let toast = Toastify({
+                text: message,
+                duration: durationMs,
+                close: true,
+                gravity: "top", 
+                position: "center", 
+                style: {
+                    background: isError ? "#ef4444" : "#111",
+                    color: isError ? "white" : "white",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "8px",
+                    fontFamily: "'Inter', sans-serif"
+                }
+            });
+            toast.showToast();
+            return toast;
+        }
+
+        function setRole(role) {
+            const btnPlanner = document.getElementById('btn-planner');
+            const btnVendor = document.getElementById('btn-vendor');
+            const form = document.getElementById('registerForm');
+            const title = document.getElementById('register-title');
+            const loginLink = document.getElementById('loginLink');
+            const vendorFields = document.getElementById('vendorFields');
+            const bName = document.getElementById('business_name');
+            const bCategory = document.getElementsByName('category')[0];
+            const bProofText = document.getElementsByName('business_proof_text')[0];
+            const bProofFile = document.getElementsByName('business_proof_file')[0];
+            const vendorWrapper = document.getElementById('vendorWrapper');
+            const fadeWrapper = document.getElementById('fade-wrapper');
+
+            fadeWrapper.style.opacity = '0';
+
+            setTimeout(() => {
+                // Reset shared fields when toggling
+                document.getElementById('phone').value = '';
+                document.getElementById('phone').readOnly = false;
+                document.getElementById('otp').value = '';
+                document.getElementById('otp').disabled = false;
+                document.getElementById('otp-container').style.display = 'none';
+                document.getElementById('sendOtpBtn').style.display = 'block';
+                document.getElementById('sendOtpBtn').innerText = 'Send OTP';
+                document.getElementById('sendOtpBtn').disabled = false;
+                document.getElementById('verifyOtpBtn').style.display = 'block';
+                document.getElementById('password-container').style.display = 'none';
+                document.getElementsByName('password')[0].value = '';
+                currentSentOtp = null;
+
+                if (role === 'planner') {
+                    btnPlanner.style.background = 'var(--primary)';
+                    btnPlanner.style.color = 'var(--bg-dark)';
+                    btnVendor.style.background = 'transparent';
+                    btnVendor.style.color = 'var(--text-muted)';
+                    form.action = '/register';
+                    title.innerText = 'Create an account via Mobile';
+                    loginLink.href = '/login';
+                    vendorWrapper.classList.remove('show');
+                    
+                    // Remove required attribute and clear values for vendor fields
+                    bName.required = false; bName.value = '';
+                    bCategory.required = false; bCategory.value = '';
+                    bProofText.required = false; bProofText.value = '';
+                    bProofFile.required = false; bProofFile.value = '';
+                } else {
+                    btnVendor.style.background = 'var(--primary)';
+                    btnVendor.style.color = 'var(--bg-dark)';
+                    btnPlanner.style.background = 'transparent';
+                    btnPlanner.style.color = 'var(--text-muted)';
+                    form.action = '/vendor_register';
+                    title.innerText = 'Register your Business';
+                    loginLink.href = '/login'; // They switch toggle on login page
+                    vendorWrapper.classList.add('show');
+                    
+                    // Add required attribute for vendor fields
+                    bName.required = true;
+                    bCategory.required = true;
+                    bProofText.required = true;
+                    bProofFile.required = true;
+                }
+
+                fadeWrapper.style.opacity = '1';
+            }, 500);
+        }
+        
+        {% if is_vendor %}
+        setRole('vendor');
+        {% endif %}
+
+        function sendOTP() {
+            const phone = document.getElementById('phone').value;
+            if(!phone || phone.length < 10) {
+                showToast("Please enter a valid 10-digit mobile number.", true);
+                return;
+            }
+
+            const btn = document.getElementById('sendOtpBtn');
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            fetch('/send_otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    if (activeOtpToast) {
+                        try { activeOtpToast.hideToast(); } catch(e) {}
+                    }
+                    // Use a very long duration (or -1) so the mock OTP doesn't disappear
+                    activeOtpToast = showToast(`MOCK SMS: Your OTP is ${data.otp}`, false, -1);
+                    currentSentOtp = data.otp;
+                    document.getElementById('otp-container').style.display = 'flex';
+                    btn.innerText = "Sent!";
+                } else {
+                    showToast(data.error, true);
+                    btn.innerText = "Send OTP";
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                showToast("Network Error", true);
+                btn.innerText = "Send OTP";
+                btn.disabled = false;
+            });
+        }
+
+        function verifyOTP() {
+            const enteredOtp = document.getElementById('otp').value;
+            if (!enteredOtp) {
+                showToast("Please enter the OTP.", true);
+                return;
+            }
+
+            if (enteredOtp === currentSentOtp) {
+                if (activeOtpToast) {
+                    try { activeOtpToast.hideToast(); } catch(e) {}
+                    activeOtpToast = null;
+                }
+                showToast("OTP Verified Successfully!");
+                document.getElementById('otp').disabled = true;
+                document.getElementById('verifyOtpBtn').style.display = 'none';
+                document.getElementById('phone').readOnly = true;
+                document.getElementById('sendOtpBtn').style.display = 'none';
+                
+                // Show the password and register button
+                document.getElementById('password-container').style.display = 'block';
+                document.getElementById('hidden_otp').value = enteredOtp;
+            } else {
+                showToast("Invalid OTP. Please try again.", true);
+            }
+        }
+
+        // Restore UI State if there's a backend validation error (e.g. AI Document Reject)
+        {% if form_data %}
+            {% if form_data.business_name %}
+                document.getElementById('business_name').value = "{{ form_data.business_name }}";
+            {% endif %}
+            {% if form_data.category %}
+                document.getElementsByName('category')[0].value = "{{ form_data.category }}";
+            {% endif %}
+            {% if form_data.business_proof_text %}
+                document.getElementsByName('business_proof_text')[0].value = "{{ form_data.business_proof_text }}";
+            {% endif %}
+        {% endif %}
+    </script>
+</body>
+</html>

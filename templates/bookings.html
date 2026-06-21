@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}My Bookings - BudgetCrafter{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1>Booking History 📜</h1>
+    <p style="color: var(--text-muted);">Manage your confirmed vendor services and payment records.</p>
+</div>
+
+<!-- Flash Messages (Refund Notifications) -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid #34d399; color: #34d399; padding: 1rem; border-radius: 12px; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-info-circle"></i>
+        <span>{{ message }}</span>
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    {% for b in bookings %}
+    <div class="glass-card" style="display: grid; grid-template-columns: 120px 1fr 200px auto; gap: 2rem; align-items: center;">
+        <img src="{{ b[10] }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;">
+        
+        <div>
+            <span class="badge badge-warning" style="margin-bottom: 5px;">{{ b[9] }}</span>
+            <h3 style="margin: 0;">{{ b[8] }}</h3>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
+                <i class="far fa-calendar-alt"></i> Booked on {{ b[7].strftime('%d %b, %Y') if b[7] else 'N/A' }}
+            </div>
+        </div>
+
+        <div style="text-align: right;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Total Amount</div>
+            <strong style="font-size: 1.2rem;">₹{{ b[4] }}</strong>
+            <div style="color: #34d399; font-size: 0.8rem; font-weight: 700; margin-top: 5px;">
+                Advance Paid: ₹{{ b[5] }}
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+            <span style="background: rgba(52, 211, 153, 0.1); color: #34d399; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                <i class="fas fa-check-circle"></i> {{ b[6] }}
+            </span>
+            <a href="/cancel_booking/{{ b[0] }}" onclick="return confirm('Are you sure you want to cancel this booking? Your advance payment will be refunded within 24 hours.')" style="color: #f87171; font-size: 0.85rem; text-decoration: none;">
+                <i class="fas fa-trash"></i> Remove Booking
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="glass-card" style="text-align: center; padding: 5rem;">
+        <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--text-muted); opacity: 0.2; margin-bottom: 1.5rem;"></i>
+        <h2>No Bookings Found</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">You haven't booked any vendors yet. Explore the marketplace to get started!</p>
+        <a href="/vendors" class="btn btn-primary">Find Vendors</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

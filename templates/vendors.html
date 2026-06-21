@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}Find Vendors - BudgetCrafter{% endblock %}
+
+{% block head %}
+<style>
+    .vendor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 100px; /* Space for selection bar */
+    }
+    .vendor-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: 1px solid var(--glass-border);
+        position: relative;
+    }
+    .vendor-card.selected {
+        border-color: #34d399;
+        box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+    }
+    .vendor-card.selected::before {
+        content: '\f058';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #34d399;
+        font-size: 1.5rem;
+        z-index: 10;
+        background: rgba(0,0,0,0.5);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .vendor-image {
+        height: 160px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+    .rating-badge {
+        background: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .filter-btn {
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        border: 1px solid var(--glass-border);
+    }
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    /* Selection Bar */
+    .selection-bar {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 300px);
+        max-width: 900px;
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        display: none; /* Hidden by default */
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes slideUp {
+        from { transform: translate(-50%, 100%); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <div>
+        <h1>Find Event Vendors</h1>
+        <p style="color: var(--text-muted);">Discover top-rated photographers, decorators, and caterers for your event.</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 2rem;">
+    <a href="/vendors?category=All{% if event_id %}&event_id={{ event_id }}{% endif %}" class="filter-btn {% if active_cat == 'All' %}active{% endif %}">All</a>
+    {% for cat in categories %}
+    <a href="/vendors?category={{ cat }}{% if event_id %}&event_id={{ event_id }}{% endif %}" class="filter-btn {% if active_cat == cat %}active{% endif %}">{{ cat }}</a>
+    {% endfor %}
+</div>
+
+<!-- Vendor List -->
+<div class="vendor-grid">
+    {% for v in vendors %}
+    <div class="glass-card vendor-card" id="card-{{ v[0] }}">
+        <a href="/vendor/{{ v[0] }}" style="text-decoration: none; color: inherit;">
+            <img src="{{ v[6] or 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=300' }}" class="vendor-image" alt="{{ v[1] }}">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span class="badge badge-warning" style="font-size: 0.7rem; padding: 2px 8px;">{{ v[2] }}</span>
+                <div class="rating-badge">
+                    <i class="fas fa-star" style="font-size: 0.7rem;"></i> {{ v[4] }}
+                </div>
+            </div>
+            <h3 style="margin-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 6px;">
+                {{ v[1] }}
+                {% if v|length > 11 and v[11] %}
+                <i class="fas fa-check-circle" style="color: #10b981; font-size: 0.85rem;" title="Verified Business"></i>
+                {% endif %}
+            </h3>
+        </a>
+        <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1.2rem; height: 3.2rem; overflow: hidden;">
+            {{ v[5] or "Specialized professional services for your perfect event celebrations." }}
+        </p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem;">
+            <button onclick="toggleVendor('{{ v[0] }}', '{{ v[1]|escape }}', '{{ v[3] }}')" class="btn" id="btn-select-{{ v[0] }}" style="justify-content: center; background: rgba(255,255,255,0.05); color: white; font-size: 0.8rem; padding: 0.5rem; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;">
+                <i class="fas fa-plus"></i> Select
+            </button>
+            <button onclick="openContactModal('{{ v[1]|escape }}', '{{ v[7]|escape }}', '{{ v[8]|escape }}')" class="btn" style="justify-content: center; background: rgba(99, 102, 241, 0.1); color: var(--primary); font-size: 0.8rem; padding: 0.5rem; border: none; cursor: pointer;">
+                <i class="fas fa-phone"></i> Contact
+            </button>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.8rem;">
+            <span style="color: var(--text-muted); font-size: 0.7rem; display: block; text-transform: uppercase;">Pricing Starts</span>
+            <span style="color: #34d399; font-weight: 700; font-size: 1.2rem;">₹{{ v[3] }}</span>
+        </div>
+    </div>
+    {% else %}
+    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+        <i class="fas fa-search" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.2;"></i>
+        <p>No vendors found in this category.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Selection Floating Bar -->
+<div id="selectionBar" class="selection-bar">
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <div style="background: rgba(52, 211, 153, 0.1); padding: 0.5rem 1rem; border-radius: 12px; border: 1px solid rgba(52, 211, 153, 0.2);">
+            <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Selected Vendors</span>
+            <strong id="selectedCount" style="color: #34d399; font-size: 1.2rem;">0</strong>
+        </div>
+        <div>
+            <span style="color: var(--text-muted); font-size: 0.75rem; display: block;">Estimated Total</span>
+            <strong id="totalEstimate" style="color: white; font-size: 1.4rem;">₹0</strong>
+        </div>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+        <button onclick="clearSelection()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem;">Clear All</button>
+        {% if event_id %}
+        <form action="/link_vendors_bulk" method="POST" id="bulkForm">
+            <input type="hidden" name="event_id" value="{{ event_id }}">
+            <input type="hidden" name="vendor_ids" id="vendorIdsInput">
+            <button type="submit" class="btn btn-primary" style="padding: 0.8rem 1.5rem; font-weight: 600;">Add to Event Budget</button>
+        </form>
+        {% else %}
+        <button onclick="alert('Please navigate from an event page to link these to your budget!')" class="btn btn-primary" style="padding: 0.8rem 1.5rem; font-weight: 600; opacity: 0.7;">Compare Only</button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div id="contactModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; justify-content: center; align-items: center;">
+    <div class="glass-card" style="max-width: 400px; width: 90%; padding: 2rem; position: relative; border: 1px solid var(--primary);">
+        <button onclick="closeContactModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem;">&times;</button>
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="width: 60px; height: 60px; background: rgba(99, 102, 241, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem;">
+                <i class="fas fa-phone-alt" style="color: var(--primary); font-size: 1.5rem;"></i>
+            </div>
+            <h2 id="modalVendorName" style="margin-bottom: 0.5rem;">Vendor Name</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Contact the vendor directly to discuss your event.</p>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+            <a id="modalCallLink" href="#" style="text-decoration: none; display: block;">
+                <div style="display: flex; align-items: center; gap: 1rem; background: rgba(52, 211, 153, 0.1); padding: 1rem; border-radius: 12px; border: 1px solid rgba(52, 211, 153, 0.2); transition: all 0.2s;">
+                    <i class="fas fa-phone" style="color: #34d399;"></i>
+                    <div style="flex: 1;">
+                        <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Phone Number (Click to Call)</span>
+                        <strong id="modalVendorPhone" style="color: white; font-size: 1.1rem;">+91 00000 00000</strong>
+                    </div>
+                    <i class="fas fa-external-link-alt" style="font-size: 0.8rem; color: #34d399;"></i>
+                </div>
+            </a>
+            
+            <div style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px;">
+                <i class="fas fa-at" style="color: #6366f1;"></i>
+                <div>
+                    <span style="display: block; font-size: 0.75rem; color: var(--text-muted);">Email Address</span>
+                    <strong id="modalVendorEmail" style="color: white;">contact@vendor.com</strong>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <a id="modalTelBtn" href="#" class="btn" style="background: #34d399; color: black; justify-content: center; font-weight: 600;">
+                <i class="fas fa-phone"></i> Call Now
+            </a>
+            <button onclick="closeContactModal()" class="btn btn-primary" style="justify-content: center; background: rgba(255,255,255,0.05); color: white;">Close</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let selectedVendors = [];
+
+    function toggleVendor(id, name, price) {
+        price = parseInt(price);
+        const index = selectedVendors.findIndex(v => v.id === id);
+        
+        if (index > -1) {
+            // Remove
+            selectedVendors.splice(index, 1);
+            document.getElementById('card-' + id).classList.remove('selected');
+            document.getElementById('btn-select-' + id).innerHTML = '<i class="fas fa-plus"></i> Select';
+            document.getElementById('btn-select-' + id).style.background = 'rgba(255,255,255,0.05)';
+        } else {
+            // Add
+            selectedVendors.push({id, name, price});
+            document.getElementById('card-' + id).classList.add('selected');
+            document.getElementById('btn-select-' + id).innerHTML = '<i class="fas fa-check"></i> Selected';
+            document.getElementById('btn-select-' + id).style.background = 'rgba(52, 211, 153, 0.1)';
+        }
+        
+        updateBar();
+    }
+
+    function updateBar() {
+        const bar = document.getElementById('selectionBar');
+        const count = document.getElementById('selectedCount');
+        const total = document.getElementById('totalEstimate');
+        const idsInput = document.getElementById('vendorIdsInput');
+        
+        if (selectedVendors.length > 0) {
+            bar.style.display = 'flex';
+            count.innerText = selectedVendors.length;
+            
+            const sum = selectedVendors.reduce((acc, v) => acc + v.price, 0);
+            total.innerText = '₹' + sum.toLocaleString();
+            
+            if (idsInput) {
+                idsInput.value = selectedVendors.map(v => v.id).join(',');
+            }
+        } else {
+            bar.style.display = 'none';
+        }
+    }
+
+    function clearSelection() {
+        selectedVendors.forEach(v => {
+            document.getElementById('card-' + v.id).classList.remove('selected');
+            document.getElementById('btn-select-' + v.id).innerHTML = '<i class="fas fa-plus"></i> Select';
+            document.getElementById('btn-select-' + v.id).style.background = 'rgba(255,255,255,0.05)';
+        });
+        selectedVendors = [];
+        updateBar();
+    }
+
+    function openContactModal(name, email, phone) {
+        document.getElementById('modalVendorName').innerText = name;
+        document.getElementById('modalVendorEmail').innerText = email;
+        document.getElementById('modalVendorPhone').innerText = phone;
+        
+        // Update links
+        const cleanPhone = phone.replace(/\s/g, '');
+        document.getElementById('modalCallLink').href = 'tel:' + cleanPhone;
+        document.getElementById('modalTelBtn').href = 'tel:' + cleanPhone;
+        
+        document.getElementById('contactModal').style.display = 'flex';
+    }
+
+    function closeContactModal() {
+        document.getElementById('contactModal').style.display = 'none';
+    }
+
+    // Close on outside click
+    window.onclick = function(event) {
+        const modal = document.getElementById('contactModal');
+        const cModal = document.getElementById('contactModal');
+        if (event.target == cModal) {
+            closeContactModal();
+        }
+    }
+</script>
+{% endblock %}
