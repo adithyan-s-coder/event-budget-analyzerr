@@ -565,38 +565,22 @@
             observer.observe(el);
         });
 
-        // AI Voice Welcome Message
+        // AI Voice Welcome Message (Using reliable MP3 Audio)
         let hasSpoken = false;
-        
-        function speakWelcome() {
-            if (!hasSpoken && 'speechSynthesis' in window) {
-                // Cancel any stuck speech (common bug on mobile Chrome)
-                window.speechSynthesis.cancel();
+        const welcomeAudio = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=Welcome+to+Budget+Crafter');
+        welcomeAudio.volume = 1.0;
 
-                const utterance = new SpeechSynthesisUtterance("Welcome to Budget Crafter!");
-                utterance.rate = 0.95; 
-                utterance.pitch = 1.0;
-                
-                const voices = window.speechSynthesis.getVoices();
-                const bestVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Google US English'));
-                if (bestVoice) {
-                    utterance.voice = bestVoice;
-                }
-
-                window.speechSynthesis.speak(utterance);
+        function playWelcome() {
+            if (!hasSpoken) {
+                // Play the premium AI voice MP3
+                welcomeAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
                 hasSpoken = true;
             }
         }
 
-        // We trigger it on the first click. (We removed touchstart because it sometimes doesn't count as a user gesture for audio on mobile, which would break the click event).
-        document.body.addEventListener('click', speakWelcome, { once: true });
-        
-        // Ensure voices are loaded
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
-        }
+        // Listen for the absolute first interaction anywhere on the screen
+        document.body.addEventListener('click', playWelcome, { once: true });
+        document.body.addEventListener('touchstart', playWelcome, { once: true });
     </script>
 </body>
 </html>
