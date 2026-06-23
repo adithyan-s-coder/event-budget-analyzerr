@@ -570,29 +570,26 @@
         
         function speakWelcome() {
             if (!hasSpoken && 'speechSynthesis' in window) {
-                // Play only once per session so it doesn't annoy the user on every refresh
-                if (!sessionStorage.getItem('welcomePlayed')) {
-                    const utterance = new SpeechSynthesisUtterance("Welcome to Budget Crafter!");
-                    utterance.rate = 0.95; // Slightly slower for clarity
-                    utterance.pitch = 1.0;
-                    
-                    // Try to pick a natural-sounding English voice if available
-                    const voices = window.speechSynthesis.getVoices();
-                    const bestVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Google US English'));
-                    if (bestVoice) {
-                        utterance.voice = bestVoice;
-                    }
+                // Cancel any stuck speech (common bug on mobile Chrome)
+                window.speechSynthesis.cancel();
 
-                    window.speechSynthesis.speak(utterance);
-                    sessionStorage.setItem('welcomePlayed', 'true');
+                const utterance = new SpeechSynthesisUtterance("Welcome to Budget Crafter!");
+                utterance.rate = 0.95; 
+                utterance.pitch = 1.0;
+                
+                const voices = window.speechSynthesis.getVoices();
+                const bestVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha') || v.name.includes('Google US English'));
+                if (bestVoice) {
+                    utterance.voice = bestVoice;
                 }
+
+                window.speechSynthesis.speak(utterance);
                 hasSpoken = true;
             }
         }
 
-        // Modern browsers block audio autoplay. We trigger it on the first interaction.
+        // We trigger it on the first click. (We removed touchstart because it sometimes doesn't count as a user gesture for audio on mobile, which would break the click event).
         document.body.addEventListener('click', speakWelcome, { once: true });
-        document.body.addEventListener('touchstart', speakWelcome, { once: true });
         
         // Ensure voices are loaded
         if ('speechSynthesis' in window) {
