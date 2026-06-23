@@ -780,19 +780,17 @@
 
         // Localized AI Voice for 'How It Works'
         document.getElementById('read-steps-btn').addEventListener('click', function() {
-            // Stop any ongoing native speech
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel(); 
             }
-            // Stop any ongoing MP3 speech
             if (window.currentAudio) {
                 window.currentAudio.pause();
             }
             
-            // Gather translated text from the steps
+            // Gather translated text using textContent to ensure it's captured
             let textToRead = "";
             document.querySelectorAll('.step-content').forEach(step => {
-                textToRead += step.innerText + ". "; 
+                textToRead += step.textContent + ". "; 
             });
 
             // Robustly detect current language
@@ -811,51 +809,63 @@
                     }
                 }
             }
+            
+            const langMap = {
+                'ta': 'ta-IN',
+                'hi': 'hi-IN',
+                'es': 'es-ES',
+                'fr': 'fr-FR',
+                'ar': 'ar-SA',
+                'en': 'en-US'
+            };
+            const targetLangCode = langMap[currentLang] || currentLang;
 
-            // Clean up text
             textToRead = textToRead.replace(/\n/g, ' ').replace(/\s+/g, ' ');
             
-            // The user's device might lack a native TTS voice for Tamil/Hindi, causing it to skip 
-            // the foreign characters and only say English words like "AI".
-            // To fix this 100% reliably, we bypass the device entirely and stream the premium MP3 
-            // directly from Google's servers in chunks (to bypass the 200 character limit).
+            // Android TTS has a hard limit of ~400 characters.
+            // We chunk the text by sentences to ensure it plays fully.
+            let sentences = textToRead.match(/[^.!?]+[.!?]+/g) || [textToRead];
             
-            let chunks = [];
-            let words = textToRead.split(' ');
-            let currentChunk = '';
-            
-            words.forEach(word => {
-                // 150 chars is a safe limit below Google's 200 char hard limit
-                if (currentChunk.length + word.length > 150) {
-                    chunks.push(currentChunk.trim());
-                    currentChunk = word + ' ';
-                } else {
-                    currentChunk += word + ' ';
+            const voices = window.speechSynthesis.getVoices();
+            let voiceToUse = voices.find(v => v.lang.toLowerCase().startsWith(currentLang.toLowerCase()) && v.name.includes('Google'));
+            if (!voiceToUse) {
+                voiceToUse = voices.find(v => v.lang.toLowerCase().startsWith(currentLang.toLowerCase()));
+            }
+
+            let i = 0;
+            function speakNextChunk() {
+                if (i >= sentences.length) return;
+                
+                let chunk = sentences[i].trim();
+                if (!chunk) {
+                    i++;
+                    speakNextChunk();
+                    return;
                 }
-            });
-            if (currentChunk) {
-                chunks.push(currentChunk.trim());
+
+                const utterance = new SpeechSynthesisUtterance(chunk);
+                utterance.lang = targetLangCode;
+                utterance.rate = 0.9;
+                
+                if (voiceToUse) {
+                    utterance.voice = voiceToUse;
+                }
+                
+                utterance.onend = function() {
+                    i++;
+                    speakNextChunk();
+                };
+                
+                utterance.onerror = function(e) {
+                    console.error("SpeechSynthesis error:", e);
+                    i++;
+                    speakNextChunk();
+                };
+
+                window.speechSynthesis.speak(utterance);
             }
             
-            let chunkIndex = 0;
-            function playNextChunk() {
-                if (chunkIndex >= chunks.length) return;
-                
-                // Get the direct MP3 from Google Translate servers
-                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${currentLang}&client=tw-ob&q=${encodeURIComponent(chunks[chunkIndex])}`;
-                const audio = new Audio(url);
-                window.currentAudio = audio;
-                
-                audio.onended = playNextChunk;
-                audio.play().catch(e => {
-                    console.error("Premium Audio API failed, trying to skip chunk...", e);
-                    playNextChunk();
-                });
-                
-                chunkIndex++;
-            }
-            
-            playNextChunk();
+            speakNextChunk();
         });
 
         // Ensure voices load
