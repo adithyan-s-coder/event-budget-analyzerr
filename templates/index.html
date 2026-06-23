@@ -31,29 +31,71 @@
             z-index: 100;
         }
 
-        /* Google Translate Styling */
-        .language-selector {
-            margin-right: 15px;
+        /* Custom Language Selector Styling */
+        .custom-lang-selector {
+            position: relative;
+            margin-right: 10px;
         }
-        .goog-te-gadget {
-            font-family: 'Inter', sans-serif !important;
-            color: transparent !important;
-            font-size: 0 !important; /* hide powered by google text */
-        }
-        .goog-te-gadget .goog-te-combo {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            outline: none;
+        .lang-btn {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .goog-te-gadget .goog-te-combo option {
-            background: #000;
-            color: white;
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.05);
+        }
+        .lang-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: #111;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 130px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+        .lang-dropdown.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .lang-dropdown a {
+            color: #ccc;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .lang-dropdown a:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
+        /* Hide Google's Default Widget completely */
+        #google_translate_element {
+            display: none !important;
         }
         .goog-logo-link {
             display:none !important;
@@ -443,13 +485,13 @@
                 align-items: center;
                 gap: 3px;
             }
-            .language-selector {
-                margin-right: 2px;
+            .custom-lang-selector {
+                margin-right: 5px;
             }
-            .goog-te-gadget .goog-te-combo {
-                padding: 4px;
-                font-size: 0.8rem;
-                max-width: 80px;
+            .lang-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
             }
             .btn-login {
                 padding: 0.5rem 0.5rem;
@@ -482,7 +524,19 @@
             <span>BudgetCrafter</span>
         </a>
         <div class="nav-buttons">
-            <div id="google_translate_element" class="language-selector"></div>
+            <div class="custom-lang-selector">
+                <button id="lang-btn" class="lang-btn"><i class="fas fa-globe"></i></button>
+                <div id="lang-dropdown" class="lang-dropdown">
+                    <a href="#" data-lang="en">🇬🇧 English</a>
+                    <a href="#" data-lang="ta">🇮🇳 Tamil</a>
+                    <a href="#" data-lang="hi">🇮🇳 Hindi</a>
+                    <a href="#" data-lang="es">🇪🇸 Spanish</a>
+                    <a href="#" data-lang="fr">🇫🇷 French</a>
+                    <a href="#" data-lang="ar">🇦🇪 Arabic</a>
+                </div>
+            </div>
+            <!-- Hidden Google Widget -->
+            <div id="google_translate_element"></div>
             <a href="/login" class="btn-login">Log In</a>
             <a href="/register" class="btn-signup">Get Started</a>
         </div>
@@ -615,6 +669,37 @@
             observer.observe(el);
         });
 
+        // Custom Language Selector Logic
+        const langBtn = document.getElementById('lang-btn');
+        const langDropdown = document.getElementById('lang-dropdown');
+        
+        langBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            langDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-lang-selector')) {
+                langDropdown.classList.remove('show');
+            }
+        });
+
+        // Trigger Google Translate when a custom option is clicked
+        document.querySelectorAll('.lang-dropdown a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const lang = this.getAttribute('data-lang');
+                
+                const combo = document.querySelector('.goog-te-combo');
+                if (combo) {
+                    combo.value = lang;
+                    combo.dispatchEvent(new Event('change'));
+                }
+                langDropdown.classList.remove('show');
+            });
+        });
+
         // Localized AI Voice for 'How It Works'
         document.getElementById('read-steps-btn').addEventListener('click', function() {
             window.speechSynthesis.cancel(); // Stop any ongoing speech
@@ -630,9 +715,9 @@
             utterance.rate = 0.9;
             
             // Detect the current language from Google Translate combo
-            const langSelect = document.querySelector('.goog-te-combo');
-            if (langSelect && langSelect.value) {
-                utterance.lang = langSelect.value;
+            const combo = document.querySelector('.goog-te-combo');
+            if (combo && combo.value) {
+                utterance.lang = combo.value;
             } else {
                 utterance.lang = 'en';
             }
