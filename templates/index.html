@@ -30,6 +30,12 @@
             align-items: center;
             z-index: 100;
         }
+        
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
 
         /* Custom Language Selector Styling */
         .custom-lang-selector {
@@ -691,12 +697,31 @@
                 e.preventDefault();
                 const lang = this.getAttribute('data-lang');
                 
+                // Reliable method: Set Google Translate cookies and reload
+                if (lang === 'en') {
+                    // Clear cookies to revert to original English
+                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." + location.hostname + "; path=/;";
+                    document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + location.hostname + "; path=/;";
+                } else {
+                    document.cookie = `googtrans=/en/${lang}; path=/;`;
+                    document.cookie = `googtrans=/en/${lang}; domain=.${location.hostname}; path=/;`;
+                    document.cookie = `googtrans=/en/${lang}; domain=${location.hostname}; path=/;`;
+                }
+                
+                langDropdown.classList.remove('show');
+                
+                // Optional: Try dispatching event for instant change without reload
                 const combo = document.querySelector('.goog-te-combo');
                 if (combo) {
                     combo.value = lang;
-                    combo.dispatchEvent(new Event('change'));
+                    combo.dispatchEvent(new Event('change', { bubbles: true }));
                 }
-                langDropdown.classList.remove('show');
+                
+                // Fallback: reload page to apply cookie translation
+                setTimeout(() => {
+                    window.location.reload();
+                }, 300);
             });
         });
 
