@@ -20,18 +20,49 @@
         }
 
         .landing-header {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
+            padding: 1.5rem 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 5%;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        /* Google Translate Styling */
+        .language-selector {
+            margin-right: 15px;
+        }
+        .goog-te-gadget {
+            font-family: 'Inter', sans-serif !important;
+            color: transparent !important;
+            font-size: 0 !important; /* hide powered by google text */
+        }
+        .goog-te-gadget .goog-te-combo {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            cursor: pointer;
+        }
+        .goog-te-gadget .goog-te-combo option {
+            background: #000;
+            color: white;
+        }
+        .goog-logo-link {
+            display:none !important;
+        }
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+        body {
+            top: 0px !important; 
         }
 
         .landing-logo {
@@ -397,20 +428,28 @@
         @media (max-width: 768px) {
             .landing-header {
                 padding: 1rem 5%;
-                gap: 10px;
+                gap: 5px;
             }
             .landing-logo {
-                font-size: 1.2rem;
-                gap: 6px;
+                font-size: 1.1rem;
+                gap: 4px;
             }
             .landing-logo img {
-                height: 24px;
-                width: 24px;
+                height: 22px;
+                width: 22px;
             }
             .nav-buttons {
                 display: flex;
                 align-items: center;
-                gap: 5px;
+                gap: 3px;
+            }
+            .language-selector {
+                margin-right: 2px;
+            }
+            .goog-te-gadget .goog-te-combo {
+                padding: 4px;
+                font-size: 0.8rem;
+                max-width: 80px;
             }
             .btn-login {
                 padding: 0.5rem 0.5rem;
@@ -418,7 +457,7 @@
                 white-space: nowrap;
             }
             .btn-signup {
-                padding: 0.5rem 1rem;
+                padding: 0.5rem 0.8rem;
                 font-size: 0.85rem;
                 white-space: nowrap;
                 margin-left: 0;
@@ -443,6 +482,7 @@
             <span>BudgetCrafter</span>
         </a>
         <div class="nav-buttons">
+            <div id="google_translate_element" class="language-selector"></div>
             <a href="/login" class="btn-login">Log In</a>
             <a href="/register" class="btn-signup">Get Started</a>
         </div>
@@ -506,6 +546,9 @@
         <div class="section-header reveal">
             <h2>How It Works</h2>
             <p>From planning to execution in three simple steps.</p>
+            <button id="read-steps-btn" class="cta-btn" style="padding: 0.6rem 1.5rem; font-size: 0.9rem; margin-top: 1rem; background: rgba(99, 102, 241, 0.1); color: #fff; border: 1px solid rgba(99, 102, 241, 0.3);">
+                <i class="fas fa-volume-up"></i> Listen in your Language
+            </button>
         </div>
         <div class="step-container">
             <div class="step-item reveal" style="--delay: 1;">
@@ -544,6 +587,13 @@
         <p>&copy; 2026 BudgetCrafter. All rights reserved.</p>
     </footer>
 
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false}, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
     <script>
         // Scroll Reveal Observer
         const observerOptions = {
@@ -565,34 +615,45 @@
             observer.observe(el);
         });
 
-        // AI Voice Welcome Message (Aggressive Autoplay Strategy)
-        let hasSpoken = false;
-        const welcomeAudio = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=Welcome+to+Budget+Crafter');
-        
-        function forcePlay() {
-            if (!hasSpoken) {
-                let playPromise = welcomeAudio.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {
-                        // Playback started successfully!
-                        hasSpoken = true;
-                    }).catch(error => {
-                        // Autoplay was blocked by the browser. It will retry on the next user interaction.
-                    });
-                }
+        // Localized AI Voice for 'How It Works'
+        document.getElementById('read-steps-btn').addEventListener('click', function() {
+            window.speechSynthesis.cancel(); // Stop any ongoing speech
+            
+            // Gather translated text from the steps
+            let textToRead = "";
+            document.querySelectorAll('.step-content').forEach(step => {
+                // innerText gets the currently visible translated text
+                textToRead += step.innerText + ". "; 
+            });
+
+            const utterance = new SpeechSynthesisUtterance(textToRead);
+            utterance.rate = 0.9;
+            
+            // Detect the current language from Google Translate combo
+            const langSelect = document.querySelector('.goog-te-combo');
+            if (langSelect && langSelect.value) {
+                utterance.lang = langSelect.value;
+            } else {
+                utterance.lang = 'en';
             }
-        }
 
-        // 1. Try to play immediately as soon as the page loads (Works on some browsers)
-        window.addEventListener('load', forcePlay);
-        document.addEventListener('DOMContentLoaded', forcePlay);
+            // Find a matching voice for the language
+            const voices = window.speechSynthesis.getVoices();
+            const langPrefix = utterance.lang.split('-')[0].toLowerCase();
+            const bestVoice = voices.find(v => v.lang.toLowerCase().startsWith(langPrefix));
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+            }
 
-        // 2. If the browser blocks immediate playback, play it on the very first micro-interaction
-        // (e.g. the millisecond they touch the screen to scroll, move their mouse, or tap)
-        const events = ['click', 'touchstart', 'scroll', 'mousemove', 'keydown'];
-        events.forEach(evt => {
-            window.addEventListener(evt, forcePlay, { passive: true });
+            window.speechSynthesis.speak(utterance);
         });
+
+        // Ensure voices load
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
     </script>
 </body>
 </html>
