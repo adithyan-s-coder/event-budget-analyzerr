@@ -565,22 +565,34 @@
             observer.observe(el);
         });
 
-        // AI Voice Welcome Message (Using reliable MP3 Audio)
+        // AI Voice Welcome Message (Aggressive Autoplay Strategy)
         let hasSpoken = false;
         const welcomeAudio = new Audio('https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=Welcome+to+Budget+Crafter');
-        welcomeAudio.volume = 1.0;
-
-        function playWelcome() {
+        
+        function forcePlay() {
             if (!hasSpoken) {
-                // Play the premium AI voice MP3
-                welcomeAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
-                hasSpoken = true;
+                let playPromise = welcomeAudio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        // Playback started successfully!
+                        hasSpoken = true;
+                    }).catch(error => {
+                        // Autoplay was blocked by the browser. It will retry on the next user interaction.
+                    });
+                }
             }
         }
 
-        // Listen for the absolute first interaction anywhere on the screen
-        document.body.addEventListener('click', playWelcome, { once: true });
-        document.body.addEventListener('touchstart', playWelcome, { once: true });
+        // 1. Try to play immediately as soon as the page loads (Works on some browsers)
+        window.addEventListener('load', forcePlay);
+        document.addEventListener('DOMContentLoaded', forcePlay);
+
+        // 2. If the browser blocks immediate playback, play it on the very first micro-interaction
+        // (e.g. the millisecond they touch the screen to scroll, move their mouse, or tap)
+        const events = ['click', 'touchstart', 'scroll', 'mousemove', 'keydown'];
+        events.forEach(evt => {
+            window.addEventListener(evt, forcePlay, { passive: true });
+        });
     </script>
 </body>
 </html>
