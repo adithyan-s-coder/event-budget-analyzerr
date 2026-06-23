@@ -429,6 +429,28 @@ def vendor_register():
         
     return redirect(url_for("login"))
 
+import requests
+import urllib.parse
+from flask import Response
+
+@app.route("/api/tts")
+def tts_proxy():
+    text = request.args.get("text", "")
+    lang = request.args.get("lang", "en")
+    if not text:
+        return "No text", 400
+    
+    url = f"https://translate.google.com/translate_tts?ie=UTF-8&tl={lang}&client=tw-ob&q={urllib.parse.quote(text)}"
+    try:
+        # User-Agent ensures Google doesn't block the request, and no Referer is sent!
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
+        if r.status_code == 200:
+            return Response(r.content, mimetype="audio/mpeg")
+    except Exception as e:
+        print("TTS Error:", e)
+    
+    return "Error", 500
+
 @app.route("/vendor_dashboard")
 def vendor_dashboard():
     if "vendor_id" not in session or session.get("role") != "vendor":
